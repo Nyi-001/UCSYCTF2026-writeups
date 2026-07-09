@@ -281,7 +281,7 @@ when i open it , nothing special , but let's analyze these images at https://ape
 
 and i found the flag from image1.jpg
 
-![](/images/Screenshot_2026-07-09_15-14-11.png)
+![](/images/flag.png)
 
 BOOM!
 
