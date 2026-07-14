@@ -166,8 +166,9 @@ So let's find the middle part of the flag in logs/mail/mail.log
 I got base64 encoded **X-Data-Chunk: cHIwdDBjMGxfbXVsdDFf**
 
 ![](/images/Screenshot_2026-07-09_13-57-10.png)
+so we all of the flag part but when i submit , wrong. So we need to decode the last part becuz it can't be reable.After analyzing, rot13 cipher so decode it => **channel_exfil**
 
-So the flag is **UCSYCTF{gh0st_pr0t0c0l_mult1_pu4aa3y_rks1y}**
+So the flag is **UCSYCTF{gh0st_pr0t0c0l_mult1_ch4nn3l_exf1l}**
 
 ---
 
